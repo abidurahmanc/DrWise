@@ -150,8 +150,7 @@ h1 {
 
 .input-container {
     display: flex;
-    /* gap: 1rem; */
-    /* margin: 1rem; */
+    gap: 1rem;
     background-color: var(--bg-color);
     border-radius: 16px;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
@@ -160,55 +159,88 @@ h1 {
     /* border: 1px solid var(--border-color); */
 }
 
-input[type="text"] {
+.input-wrapper {
     flex: 1;
-    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    background-color: var(--input-bg);
     border: 2px solid var(--border-color);
     border-radius: 12px;
-    font-size: 1rem;
-    transition: all 0.2s ease;
-    font-family: inherit;
-    background-color: var(--input-bg);
+    overflow: hidden;
+}
+
+#message-input {
+    flex: 1;
+    padding: 1rem 1.25rem;
+    border: none;
+    background-color: transparent;
     color: var(--text-color);
-}
-
-input[type="text"]:focus {
+    font-size: 1rem;
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.2);
+    font-family: inherit;
 }
 
-input[type="text"]::placeholder {
+#message-input:focus {
+    outline: none;
+}
+
+#message-input::placeholder {
     color: #94a3b8;
 }
 
-button {
-    padding: 1rem 1.5rem;
+.voice-button {
+    background: none;
+    border: none;
+    padding: 0.75rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.voice-button:hover {
+    color: var(--primary-color);
+}
+
+.voice-button.listening {
+    color: #ef4444;
+    animation: pulse 1.5s infinite;
+}
+
+#send-button {
     background-color: var(--primary-color);
     color: white;
     border: none;
     border-radius: 12px;
-    cursor: pointer;
-    font-weight: 500;
+    padding: 1rem 1.5rem;
     font-size: 1rem;
-    transition: all 0.2s ease;
+    font-weight: 500;
+    cursor: pointer;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    transition: all 0.2s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-button:hover {
+#send-button:hover {
     background-color: var(--primary-hover);
     transform: translateY(-1px);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-button:disabled {
+#send-button:disabled {
     background-color: #475569;
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
+}
+
+#send-button svg {
+    width: 18px;
+    height: 18px;
 }
 
 .loading {
@@ -435,5 +467,88 @@ button:disabled {
     .new-chat-button {
         width: 100%;
         justify-content: center;
+    }
+}
+
+.voice-status {
+    display: none;
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--card-bg);
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+}
+
+.voice-status.active {
+    display: block;
+    animation: slideUp 0.3s ease-out;
+}
+
+.voice-status-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.voice-waves {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.voice-waves span {
+    width: 3px;
+    height: 15px;
+    background-color: var(--primary-color);
+    border-radius: 3px;
+    animation: wave 1s infinite;
+}
+
+.voice-waves span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.voice-waves span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+.voice-waves span:nth-child(4) {
+    animation-delay: 0.6s;
+}
+
+@keyframes wave {
+    0%,
+    100% {
+        height: 15px;
+    }
+    50% {
+        height: 25px;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translate(-50%, 20px);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, 0);
+        opacity: 1;
     }
 }
