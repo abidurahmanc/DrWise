@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, jsonify, session
 import google.generativeai as genai
 from dotenv import load_dotenv
 import os
+import base64
+from langdetect import detect
 
 # Load environment variables from .env file
 load_dotenv()
@@ -16,12 +18,14 @@ if not API_KEY:
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel(model_name="gemini-1.5-flash-latest")
 
-# Health assistant system prompt
+# Health assistant system prompt with language instruction
 HEALTH_SYSTEM_PROMPT = """You are Dr.Wise, an AI health assistant designed to provide comprehensive health guidance. Your role is to:
 1. Conduct a thorough health assessment
 2. Provide potential conditions based on symptoms
 3. Suggest appropriate treatments and medications
 4. Recommend lifestyle changes and dietary modifications
+
+IMPORTANT: Always respond in the same language that the user uses in their message. If the user writes in Spanish, respond in Spanish. If they write in French, respond in French, and so on.
 
 Follow these guidelines:
 
@@ -90,6 +94,7 @@ Follow these guidelines:
    - Provide specific, actionable recommendations
    - Include both conventional and alternative treatment options
    - Consider the user's lifestyle and preferences
+   - Always respond in the same language as the user's message
 
 6. Response Format:
    For direct questions:
@@ -98,6 +103,7 @@ Follow these guidelines:
    - Add appropriate warnings
    - Suggest next steps
    - Continue with assessment
+
 
    For general assessment:
    - Brief acknowledgment of the user's concern
@@ -120,6 +126,7 @@ Remember to:
   * warning-message for warnings
   * emergency-message for emergencies
   * health-tip for lifestyle recommendations
+- Always respond in the same language as the user's message
 
 Current conversation context:
 """
@@ -138,6 +145,9 @@ def chat():
         return jsonify({'error': 'No message provided'}), 400
 
     try:
+        # Detect the language of the user's message
+        detected_language = detect(user_message)
+        
         # Get conversation history from session
         conversation_history = session.get('conversation_history', [])
         
@@ -157,6 +167,28 @@ def chat():
         session['conversation_history'] = conversation_history
 
         return jsonify({'message': assistant_message})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/transcribe', methods=['POST'])
+def transcribe_audio():
+    try:
+        # Get the audio data from the request
+        audio_data = request.json.get('audio')
+        if not audio_data:
+            return jsonify({'error': 'No audio data provided'}), 400
+
+        # Decode the base64 audio data
+        audio_bytes = base64.b64decode(audio_data.split(',')[1])
+
+        # Use Gemini for transcription
+        response = model.generate_content([
+            "Transcribe this audio accurately, maintaining proper punctuation and formatting:",
+            {"mime_type": "audio/webm", "data": audio_bytes}
+        ])
+        
+        transcription = response.text
+        return jsonify({'transcription': transcription})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
