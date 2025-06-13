@@ -127,6 +127,7 @@ function startNewChat() {
             'Content-Type': 'application/json'
         }
     });
+
 }
 
 function sendMessage() {
@@ -192,12 +193,116 @@ function addMessageToChat(role, message) {
 
 function scrollToBottom() {
     const chatContainer = document.getElementById('chat-container');
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    // Use smooth scrolling for better user experience
+    chatContainer.scrollTo({
+        top: chatContainer.scrollHeight,
+        behavior: 'smooth'
+    });
+}
+
+// Add MutationObserver to handle dynamic content updates
+function setupScrollObserver() {
+    const chatContainer = document.getElementById('chat-container');
+    const observer = new MutationObserver(() => {
+        scrollToBottom();
+    });
+
+    observer.observe(chatContainer, {
+        childList: true,
+        subtree: true,
+        characterData: true
+    });
+}
+
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
+
+async function initVoiceRecognition() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+
+        mediaRecorder.ondataavailable = (event) => {
+            audioChunks.push(event.data);
+        };
+
+        mediaRecorder.onstop = async() => {
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const reader = new FileReader();
+
+            reader.onloadend = async() => {
+                try {
+                    const response = await fetch('/transcribe', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            audio: reader.result
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (data.error) {
+                        console.error('Transcription error:', data.error);
+                        return;
+                    }
+
+                    const messageInput = document.getElementById('message-input');
+                    messageInput.value = data.transcription;
+                    messageInput.focus();
+                    messageInput.setSelectionRange(data.transcription.length, data.transcription.length);
+                } catch (error) {
+                    console.error('Error sending audio for transcription:', error);
+                }
+            };
+
+            reader.readAsDataURL(audioBlob);
+            audioChunks = [];
+        };
+    } catch (error) {
+        console.error('Error initializing voice recognition:', error);
+        document.getElementById('voice-button').style.display = 'none';
+    }
+}
+
+function toggleVoiceInput() {
+    if (!mediaRecorder) {
+        initVoiceRecognition();
+        return;
+    }
+
+    if (isRecording) {
+        stopRecording();
+    } else {
+        startRecording();
+    }
+}
+
+function startRecording() {
+    if (mediaRecorder && mediaRecorder.state === 'inactive') {
+        audioChunks = [];
+        mediaRecorder.start();
+        isRecording = true;
+        document.getElementById('voice-button').classList.add('listening');
+        document.getElementById('voice-status').classList.add('active');
+    }
+}
+
+function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        isRecording = false;
+        document.getElementById('voice-button').classList.remove('listening');
+        document.getElementById('voice-status').classList.remove('active');
+    }
 }
 
 // Add event listener for Enter key
 document.addEventListener('DOMContentLoaded', () => {
     const messageInput = document.getElementById('message-input');
+
     messageInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -219,6 +324,12 @@ document.addEventListener('DOMContentLoaded', () => {
         messageInput.placeholder = placeholders[currentPlaceholder];
         currentPlaceholder = (currentPlaceholder + 1) % placeholders.length;
     }, 3000);
+
+    // Initialize voice recognition
+    initVoiceRecognition();
+
+    // Setup scroll observer
+    setupScrollObserver();
 
     // Initialize with welcome message
     startNewChat();
