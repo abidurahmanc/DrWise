@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Chats</title>
+    <link rel="stylesheet" href="/static/css/landing.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <button class="menu-toggle" id="menu-toggle" aria-label="Open navigation" aria-expanded="false" aria-controls="mobile-nav">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+            <div class="logo">
+                <h1>Dr.Wise</h1>
+            </div>
+            <div class="nav-links" id="nav-links">
+                <a href="{{ url_for('landing') }}" class="nav-button">Home</a>
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-button">Dashboard</a>
+                <a href="{{ url_for('admin_users') }}" class="nav-button">Users</a>
+                <a href="{{ url_for('admin_chats') }}" class="nav-button">Chats</a>
+                <a href="{{ url_for('admin_blood_donors') }}" class="nav-button">Blood Donors</a>
+                <a href="{{ url_for('admin_logs') }}" class="nav-button">Action Logs</a>
+            </div>
+        </div>
+        <div class="mobile-nav-overlay" id="mobile-nav-overlay"></div>
+    </nav>
+    <br><br><br>
+    <main class="admin-main-content">
+        <h1>All Chats</h1>
+
+        <!-- Filter Form -->
+        <div class="filter-section" style="background-color:#0f172a;border-radius: 8px;padding: 10px; ">
+            <form method="GET" action="{{ url_for('admin_chats') }}" style="color: rgb(255, 255, 255);background-color:#0f172a;border-radius: 8px;padding: 10px; ">
+                <label for="user">Filter by User:</label>
+                <select name="user" id="user" onchange="this.form.submit()">
+                    <option value="">All Users</option>
+                    {% for user in users %}
+                        <option value="{{ user.username }}" {% if selected_user == user.username %}selected{% endif %}>
+                            {{ user.username }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <button type="submit" style="background: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-left: 10px;">Filter</button> {% if selected_user %}
+                <a href="{{ url_for('admin_chats') }}" style="background: #6b7280; color: white; border: none; padding: 8px 16px; border-radius: 4px; text-decoration: none; margin-left: 10px;">Clear Filter</a> {% endif %}
+            </form>
+        </div>
+
+        <table border="1 " cellpadding="5 ">
+            <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Message</th>
+                <th>Response</th>
+                <th>Timestamp</th>
+            </tr>
+            {% for chat in chats %}
+            <tr>
+                <td>{{ chat.id }}</td>
+                <td>{{ chat.user.username }}</td>
+                <td>{{ chat.message }}</td>
+                <td>{{ chat.response }}</td>
+                <td>{{ chat.timestamp }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        {% if not chats %}
+        <p style="text-align: center; color: #6b7280; margin-top: 20px; ">No chats found.</p>
+        {% endif %}
+    </main>
+
+    <style>
+        .filter-section {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .filter-section label {
+            font-weight: 500;
+            margin-right: 10px;
+        }
+        
+        .filter-section select {
+            padding: 6px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            background: white;
+        }
+    </style>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicine Identifier and Use Case Finder - Dr.Wise</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/medicine_helper.css') }}">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <button class="menu-toggle" id="menu-toggle" aria-label="Open navigation" aria-expanded="false" aria-controls="mobile-nav">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+            <div class="logo">
+                <h1>Dr.Wise</h1>
+            </div>
+            <div class="nav-links" id="nav-links">
+                <a href="/">Home</a>
+                <a href="/chat" class="cta-button">Start Chat</a> {% if current_user.is_authenticated and current_user.is_admin %}
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-button" style="background: var(--primary-color); color: #fff;">Admin Panel</a> {% endif %} {% if current_user.is_authenticated %}
+                <a href="{{ url_for('logout') }}" class="login-button">Logout</a> {% else %}
+                <a href="/login" class="login-button">Login</a> {% endif %}
+            </div>
+        </div>
+        <div class="mobile-nav-overlay" id="mobile-nav-overlay"></div>
+    </nav>
+
+    <main class="medicine-helper-container">
+        <h1>Medicine Identifier and Use Case Finder</h1>
+
+        <div class="input-methods">
+            <div class="method-tabs">
+                <button class="tab-btn active" data-method="text">Text Input</button>
+                <button class="tab-btn" data-method="image">Image Upload</button>
+            </div>
+
+            <!-- Text Input Method -->
+            <div class="input-section active" id="text-input">
+                <div class="form-group">
+                    <label for="medicine-name">Medicine Name</label>
+                    <input type="text" id="medicine-name" placeholder="Enter medicine name (e.g., Ibuprofen, Amoxicillin)" required>
+                </div>
+                <button class="submit-btn" onclick="identifyMedicine('text')">Find Use Cases</button>
+            </div>
+
+            <!-- Image Upload Method -->
+            <div class="input-section" id="image-input">
+                <div class="upload-area" id="upload-area">
+                    <div class="upload-content">
+                        <div class="upload-icon">📷</div>
+                        <h3>Upload Medicine Image</h3>
+                        <p>Drag and drop an image here, or click to browse</p>
+                        <p class="file-types">Supported formats: PNG, JPG, JPEG, GIF, BMP</p>
+                        <input type="file" id="medicine-image" accept="image/*" style="display: none;">
+                        <button class="browse-btn" onclick="event.stopPropagation(); document.getElementById('medicine-image').click();">Browse Files</button>
+                    </div>
+                </div>
+                <div class="image-preview" id="image-preview" style="display: none;">
+                    <img id="preview-img" alt="Medicine preview">
+                    <button class="remove-btn" onclick="removeImage()">Remove Image</button>
+                </div>
+                <button class="submit-btn" id="image-submit-btn" onclick="identifyMedicine('image')" disabled>Identify Medicine & Find Use Cases</button>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-state" id="loading-state" style="display: none;">
+            <div class="spinner"></div>
+            <p>Analyzing medicine...</p>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="results-section" style="display: none;">
+            <div class="medicine-info">
+                <h2 id="result-medicine-name"></h2>
+                <div class="use-cases" id="use-cases-content"></div>
+            </div>
+        </div>
+
+        <!-- Error Section -->
+        <div class="error-section" id="error-section" style="display: none;">
+            <div class="error-message" id="error-message"></div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Action Logs</title>
+    <link rel="stylesheet" href="/static/css/landing.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <button class="menu-toggle" id="menu-toggle" aria-label="Open navigation" aria-expanded="false" aria-controls="mobile-nav">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+            <div class="logo">
+                <h1>Dr.Wise</h1>
+            </div>
+            <div class="nav-links" id="nav-links">
+                <a href="{{ url_for('landing') }}" class="nav-button">Home</a>
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-button">Dashboard</a>
+                <a href="{{ url_for('admin_users') }}" class="nav-button">Users</a>
+                <a href="{{ url_for('admin_chats') }}" class="nav-button">Chats</a>
+                <a href="{{ url_for('admin_blood_donors') }}" class="nav-button">Blood Donors</a>
+                <a href="{{ url_for('admin_logs') }}" class="nav-button">Action Logs</a>
+            </div>
+        </div>
+        <div class="mobile-nav-overlay" id="mobile-nav-overlay"></div>
+    </nav>
+    <br><br><br>
+    <main class="admin-main-content">
+        <h1>User Action Logs</h1>
+        <table border="1" cellpadding="5">
+            <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Action</th>
+                <th>Timestamp</th>
+                <th>Details</th>
+            </tr>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.id }}</td>
+                <td>{{ log.user.username }}</td>
+                <td>{{ log.action }}</td>
+                <td>{{ log.timestamp }}</td>
+                <td>{{ log.details or '' }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </main>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+
+</html>

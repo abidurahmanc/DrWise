@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="500" height="400" viewBox="0 0 500 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background Circle -->
+    <circle cx="250" cy="200" r="180" fill="#1E293B" stroke="#0891B2" stroke-width="2"/>
+    
+    <!-- Doctor Figure -->
+    <g transform="translate(150, 100)">
+        <!-- Head -->
+        <circle cx="100" cy="60" r="40" fill="#E2E8F0"/>
+        
+        <!-- Body -->
+        <rect x="70" y="100" width="60" height="100" fill="#0891B2"/>
+        
+        <!-- Stethoscope -->
+        <path d="M130 120 C150 120, 160 140, 160 160" stroke="#E2E8F0" stroke-width="4" fill="none"/>
+        <circle cx="160" cy="160" r="8" fill="#E2E8F0"/>
+        
+        <!-- Medical Cross -->
+        <g transform="translate(100, 150)">
+            <rect x="-15" y="-30" width="30" height="60" fill="#E2E8F0"/>
+            <rect x="-30" y="-15" width="60" height="30" fill="#E2E8F0"/>
+        </g>
+    </g>
+    
+    <!-- AI Elements -->
+    <g transform="translate(250, 200)">
+        <!-- Circuit Lines -->
+        <path d="M-100 -50 L100 -50" stroke="#0891B2" stroke-width="2" stroke-dasharray="4 4"/>
+        <path d="M-100 50 L100 50" stroke="#0891B2" stroke-width="2" stroke-dasharray="4 4"/>
+        <path d="M-50 -100 L-50 100" stroke="#0891B2" stroke-width="2" stroke-dasharray="4 4"/>
+        <path d="M50 -100 L50 100" stroke="#0891B2" stroke-width="2" stroke-dasharray="4 4"/>
+        
+        <!-- Data Points -->
+        <circle cx="-50" cy="-50" r="4" fill="#059669"/>
+        <circle cx="50" cy="-50" r="4" fill="#059669"/>
+        <circle cx="-50" cy="50" r="4" fill="#059669"/>
+        <circle cx="50" cy="50" r="4" fill="#059669"/>
+    </g>
+    
+    <!-- Decorative Elements -->
+    <g transform="translate(250, 200)">
+        <!-- Outer Ring -->
+        <circle cx="0" cy="0" r="150" stroke="#0891B2" stroke-width="1" fill="none" opacity="0.3"/>
+        
+        <!-- Inner Ring -->
+        <circle cx="0" cy="0" r="120" stroke="#0891B2" stroke-width="1" fill="none" opacity="0.2"/>
+    </g>
+</svg> 

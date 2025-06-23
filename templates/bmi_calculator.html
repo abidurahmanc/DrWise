@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMI Calculator - Dr.Wise</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bmi_calculator.css') }}">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <button class="menu-toggle" id="menu-toggle" aria-label="Open navigation" aria-expanded="false" aria-controls="mobile-nav">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+            <div class="logo">
+                <h1>Dr.Wise</h1>
+            </div>
+            <div class="nav-links" id="nav-links">
+                <a href="/">Home</a>
+                <a href="/chat" class="cta-button">Start Chat</a> {% if current_user.is_authenticated and current_user.is_admin %}
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-button" style="background: var(--primary-color); color: #fff;">Admin Panel</a> {% endif %} {% if current_user.is_authenticated %}
+                <a href="{{ url_for('logout') }}" class="login-button">Logout</a> {% else %}
+                <a href="/login" class="login-button">Login</a> {% endif %}
+            </div>
+        </div>
+        <div class="mobile-nav-overlay" id="mobile-nav-overlay"></div>
+    </nav>
+    <main class="bmi-container">
+        <h1>BMI Calculator</h1>
+        <p class="description">Calculate your Body Mass Index to understand your weight category.</p>
+        <div class="calculator">
+            <div class="input-group">
+                <label for="age">Age</label>
+                <input type="number" id="age" placeholder="Enter your age">
+            </div>
+            <div class="input-group">
+                <label for="gender">Gender</label>
+                <select id="gender">
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="weight">Weight (kg)</label>
+                <input type="number" id="weight" placeholder="Enter your weight in kilograms">
+            </div>
+            <div class="input-group">
+                <label for="height">Height (cm)</label>
+                <input type="number" id="height" placeholder="Enter your height in centimeters">
+            </div>
+            <button id="calculate-btn" class="primary-button">Calculate BMI</button>
+        </div>
+        <div id="result" class="result" style="display:none;">
+            <h2>Your BMI is: <span id="bmi-value"></span></h2>
+            <p>This is considered <strong id="bmi-category"></strong>.</p>
+            <p id="age-note" class="age-note" style="display:none;"></p>
+        </div>
+    </main>
+    <script>
+        document.getElementById('calculate-btn').addEventListener('click', function() {
+            const age = parseInt(document.getElementById('age').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const resultDiv = document.getElementById('result');
+            const bmiValueSpan = document.getElementById('bmi-value');
+            const bmiCategorySpan = document.getElementById('bmi-category');
+            const ageNote = document.getElementById('age-note');
+
+            if (isNaN(age) || isNaN(weight) || isNaN(height) || age <= 0 || weight <= 0 || height <= 0) {
+                alert('Please enter valid age, weight, and height.');
+                return;
+            }
+
+            const heightInMeters = height / 100;
+            const bmi = weight / (heightInMeters * heightInMeters);
+            const roundedBmi = bmi.toFixed(2);
+
+            bmiValueSpan.textContent = roundedBmi;
+
+            let category = '';
+            if (bmi < 18.5) {
+                category = 'Underweight';
+            } else if (bmi >= 18.5 && bmi < 24.9) {
+                category = 'Normal weight';
+            } else if (bmi >= 25 && bmi < 29.9) {
+                category = 'Overweight';
+            } else {
+                category = 'Obese';
+            }
+            bmiCategorySpan.textContent = category;
+
+            if (age < 18) {
+                ageNote.textContent = 'Note: BMI interpretation for individuals under 18 is different and often uses age- and gender-specific percentile charts.';
+                ageNote.style.display = 'block';
+            } else {
+                ageNote.style.display = 'none';
+            }
+
+            resultDiv.style.display = 'block';
+        });
+    </script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+
+</html>

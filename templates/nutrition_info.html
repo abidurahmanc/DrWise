@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Nutrient Finder (Per Serving) - Dr.Wise</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/medicine_helper.css') }}">
+    <style>
+        .nutrition-helper-container {
+            max-width: 800px;
+            margin: 7rem auto 2rem;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 2rem 2.5rem;
+        }
+        
+        .nutrition-helper-container h1 {
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            font-size: 2rem;
+        }
+        
+        .nutrition-helper-container .desc {
+            text-align: center;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <button class="menu-toggle" id="menu-toggle" aria-label="Open navigation" aria-expanded="false" aria-controls="mobile-nav">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+            <div class="logo">
+                <h1>Dr.Wise</h1>
+            </div>
+            <div class="nav-links" id="nav-links">
+                <a href="/">Home</a>
+                <a href="/chat" class="cta-button">Start Chat</a> {% if current_user.is_authenticated and current_user.is_admin %}
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-button" style="background: var(--primary-color); color: #fff;">Admin Panel</a> {% endif %} {% if current_user.is_authenticated %}
+                <a href="{{ url_for('logout') }}" class="login-button">Logout</a> {% else %}
+                <a href="/login" class="login-button">Login</a> {% endif %}
+            </div>
+        </div>
+        <div class="mobile-nav-overlay" id="mobile-nav-overlay"></div>
+    </nav>
+    <main class="nutrition-helper-container">
+        <h1>Food Nutrient Finder (Per Serving)</h1>
+        <div class="desc">Enter the name of a food item or upload a food image to get detailed nutrition information per serving. Great for meal planning and healthy choices!</div>
+        <div class="input-methods">
+            <div class="method-tabs">
+                <button class="tab-btn active" data-method="text">Text Input</button>
+                <button class="tab-btn" data-method="image">Image Upload</button>
+            </div>
+            <!-- Text Input Method -->
+            <div class="input-section active" id="text-input">
+                <div class="form-group">
+                    <label for="food-name">Food Name</label>
+                    <input type="text" id="food-name" placeholder="e.g., Chicken, Egg, Milk" required>
+                </div>
+                <button class="submit-btn" onclick="findNutrition('text')">Find Nutrition</button>
+            </div>
+            <!-- Image Upload Method -->
+            <div class="input-section" id="image-input">
+                <div class="upload-area" id="upload-area">
+                    <div class="upload-content">
+                        <div class="upload-icon">🍽️</div>
+                        <h3>Upload Food Image</h3>
+                        <p>Drag and drop an image here, or click to browse</p>
+                        <p class="file-types">Supported formats: PNG, JPG, JPEG</p>
+                        <input type="file" id="food-image" accept="image/png,image/jpg,image/jpeg" style="display: none;">
+                        <button class="browse-btn" onclick="event.stopPropagation(); document.getElementById('food-image').click();">Browse Files</button>
+                    </div>
+                </div>
+                <div class="image-preview" id="image-preview" style="display: none;">
+                    <img id="preview-img" alt="Food preview">
+                    <button class="remove-btn" onclick="removeImage()">Remove Image</button>
+                </div>
+                <button class="submit-btn" id="image-submit-btn" onclick="findNutrition('image')" disabled>Identify Food & Find Nutrition</button>
+            </div>
+        </div>
+        <!-- Loading State -->
+        <div class="loading-state" id="loading-state" style="display: none;">
+            <div class="spinner"></div>
+            <p>Analyzing food item...</p>
+        </div>
+        <!-- Results Section -->
+        <div class="results-section" id="results-section" style="display: none;">
+            <div class="nutrition-info">
+                <h2 id="result-food-name"></h2>
+                <div class="nutrition-list" id="nutrition-list"></div>
+            </div>
+        </div>
+        <!-- Error Section -->
+        <div class="error-section" id="error-section" style="display: none;">
+            <div class="error-message" id="error-message"></div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const method = btn.dataset.method;
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                document.querySelectorAll('.input-section').forEach(section => section.classList.remove('active'));
+                document.getElementById(`${method}-input`).classList.add('active');
+                clearResults();
+            });
+        });
+        // File upload
+        const uploadArea = document.getElementById('upload-area');
+        const imageInput = document.getElementById('food-image');
+        const imagePreview = document.getElementById('image-preview');
+        const previewImg = document.getElementById('preview-img');
+        const imageSubmitBtn = document.getElementById('image-submit-btn');
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) handleFile(files[0]);
+        });
+        uploadArea.addEventListener('click', () => {
+            imageInput.click();
+        });
+        imageInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) handleFile(e.target.files[0]);
+        });
+
+        function handleFile(file) {
+            const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg'];
+            if (!allowedTypes.includes(file.type)) {
+                showError('Please select a valid image file (PNG, JPG, or JPEG)');
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                showError('File size must be less than 5MB');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImg.src = e.target.result;
+                uploadArea.style.display = 'none';
+                imagePreview.style.display = 'block';
+                imageSubmitBtn.disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeImage() {
+            imageInput.value = '';
+            uploadArea.style.display = 'block';
+            imagePreview.style.display = 'none';
+            imageSubmitBtn.disabled = true;
+            clearResults();
+        }
+
+        function findNutrition(method) {
+            clearResults();
+            showLoading();
+            const formData = new FormData();
+            if (method === 'text') {
+                const foodName = document.getElementById('food-name').value.trim();
+                if (!foodName) {
+                    showError('Please enter a food name');
+                    hideLoading();
+                    return;
+                }
+                formData.append('food_name', foodName);
+            } else if (method === 'image') {
+                const file = imageInput.files[0];
+                if (!file) {
+                    showError('Please select an image');
+                    hideLoading();
+                    return;
+                }
+                formData.append('image', file);
+            }
+            fetch('/api/nutrition-helper', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    hideLoading();
+                    if (data.status === 'success') {
+                        showResults(data.food_name, data.nutrition_info);
+                    } else {
+                        showError(data.error || 'An error occurred');
+                    }
+                })
+                .catch(error => {
+                    hideLoading();
+                    showError('Network error. Please try again.');
+                    console.error('Error:', error);
+                });
+        }
+
+        function showLoading() {
+            document.getElementById('loading-state').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-state').style.display = 'none';
+        }
+
+        function showResults(foodName, nutritionInfo) {
+            document.getElementById('result-food-name').textContent = foodName;
+            document.getElementById('nutrition-list').innerHTML = nutritionInfo.replace(/\n/g, '<br>');
+            document.getElementById('results-section').style.display = 'block';
+        }
+
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error-section').style.display = 'block';
+        }
+
+        function clearResults() {
+            document.getElementById('results-section').style.display = 'none';
+            document.getElementById('error-section').style.display = 'none';
+        }
+    </script>
+</body>
+
+</html>

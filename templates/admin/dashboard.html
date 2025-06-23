@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/static/css/landing.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <button class="menu-toggle" id="menu-toggle" aria-label="Open navigation" aria-expanded="false" aria-controls="mobile-nav">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+            <div class="logo">
+                <h1>Dr.Wise</h1>
+            </div>
+            <div class="nav-links" id="nav-links">
+                <a href="{{ url_for('landing') }}" class="nav-button">Home</a>
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-button">Dashboard</a>
+                <a href="{{ url_for('admin_users') }}" class="nav-button">Users</a>
+                <a href="{{ url_for('admin_chats') }}" class="nav-button">Chats</a>
+                <a href="{{ url_for('admin_blood_donors') }}" class="nav-button">Blood Donors</a>
+                <a href="{{ url_for('admin_logs') }}" class="nav-button">Action Logs</a>
+            </div>
+        </div>
+        <div class="mobile-nav-overlay" id="mobile-nav-overlay"></div>
+    </nav>
+    <main class="admin-dashboard-container">
+        <h1 class="admin-title">Admin Dashboard</h1>
+        <div class="admin-stats-grid">
+            <div class="admin-card">
+                <h2>Total Users</h2>
+                <p class="admin-stat">{{ user_count }}</p>
+            </div>
+            <div class="admin-card">
+                <h2>Total Chats</h2>
+                <p class="admin-stat">{{ chat_count }}</p>
+            </div>
+            <div class="admin-card">
+                <h2>Total Blood Donors</h2>
+                <p class="admin-stat">{{ donor_count }}</p>
+            </div>
+        </div>
+    </main>
+    <style>
+        .admin-dashboard-container {
+            max-width: 1000px;
+            margin: 6rem auto 2rem;
+            padding: 2rem;
+        }
+        
+        .admin-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 2.5rem;
+            color: var(--primary-color);
+        }
+        
+        .admin-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 2rem;
+        }
+        
+        .admin-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(8, 145, 178, 0.10);
+            padding: 2rem 1.5rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: box-shadow 0.2s;
+        }
+        
+        .admin-card:hover {
+            box-shadow: 0 8px 24px rgba(8, 145, 178, 0.18);
+        }
+        
+        .admin-card h2 {
+            color: var(--primary-color);
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .admin-stat {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--success-color);
+        }
+        
+        @media (max-width: 700px) {
+            .admin-dashboard-container {
+                padding: 1rem;
+            }
+            .admin-stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+
+</html>
